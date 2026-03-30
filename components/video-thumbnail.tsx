@@ -5,16 +5,18 @@ import { Play } from "lucide-react"
 
 type VideoThumbnailProps = {
   src: string
+  posterSrc?: string
   title: string
   className?: string
 }
 
-export function VideoThumbnail({ src, title, className }: VideoThumbnailProps) {
+export function VideoThumbnail({ src, posterSrc, title, className }: VideoThumbnailProps) {
   const videoRef = React.useRef<HTMLVideoElement | null>(null)
   const [posterUrl, setPosterUrl] = React.useState<string | null>(null)
   const posterUrlRef = React.useRef<string | null>(null)
 
   React.useEffect(() => {
+    if (posterSrc) return
     if (posterUrlRef.current) {
       URL.revokeObjectURL(posterUrlRef.current)
       posterUrlRef.current = null
@@ -83,14 +85,16 @@ export function VideoThumbnail({ src, title, className }: VideoThumbnailProps) {
     }
     // Intentionally exclude posterUrl from deps; we manage cleanup manually.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src])
+  }, [src, posterSrc])
+
+  const effectivePoster = posterSrc ?? posterUrl
 
   return (
     <div className={"relative aspect-video overflow-hidden bg-secondary/30 " + (className ?? "")}> 
-      {posterUrl ? (
+      {effectivePoster ? (
         <>
           <img
-            src={posterUrl}
+            src={effectivePoster}
             alt={title}
             className="absolute inset-0 h-full w-full object-contain object-center"
             loading="lazy"

@@ -11,6 +11,12 @@ next.user-config.*
 # Environment variables
 .env*.local
 
+# Large media (host externally, e.g. Cloudinary)
+public/**/*.mp4
+public/**/*.webm
+public/**/*.mov
+public/**/*.m4v
+
 # Common ignores
 node_modules/
 .next/

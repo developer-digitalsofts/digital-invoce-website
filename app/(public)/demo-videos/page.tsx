@@ -16,17 +16,59 @@ export const metadata = {
   description: 'Watch demo videos and tutorials for DigitalManager'
 }
 
+function cloudinaryPosterFromVideoUrl(videoUrl: string): string | undefined {
+  try {
+    const url = new URL(videoUrl)
+    if (!url.hostname.endsWith("res.cloudinary.com")) return undefined
+
+    const parts = url.pathname.split("/")
+    const uploadIndex = parts.indexOf("upload")
+    if (uploadIndex === -1) return undefined
+
+    const next = [...parts]
+    // Insert a simple transformation right after `/upload/`
+    next.splice(uploadIndex + 1, 0, "so_0.1,f_jpg")
+    const last = next[next.length - 1]
+    next[next.length - 1] = last.replace(/\.[a-z0-9]+$/i, ".jpg")
+    url.pathname = next.join("/")
+    return url.toString()
+  } catch {
+    return undefined
+  }
+}
+
 export default function DemoVideosPage() {
   const videos = [
-    { title: "Creating Your First Invoice", filename: "Invoices.mp4" },
-    { title: "Setting Up FBR Integration", filename: "FBR Invoice System - Google Chrome 2026-03-25 14-30-35.mp4" },
-    { title: "Managing Multiple Users", filename: "Users.mp4" },
-    { title: "Generating Reports", filename: "reports.mp4" },
-    { title: "Tax Calculation Explained", filename: "Screen Recording 2026-03-26 140324.mp4" },
-    { title: "Advanced Features Tour", filename: "buyer.mp4" },
+    {
+      title: "Creating Your First Invoice",
+      src: "https://res.cloudinary.com/degwyhp5q/video/upload/v1774868289/Invoices_ith6xk.mp4",
+    },
+    {
+      title: "Setting Up FBR Integration",
+      src: "https://res.cloudinary.com/degwyhp5q/video/upload/v1774868263/FBR_Invoice_System_-_Google_Chrome_2026-03-25_14-30-35_tap6i0.mp4",
+    },
+    {
+      title: "Generating Reports",
+      src: "https://res.cloudinary.com/degwyhp5q/video/upload/v1774868642/reports_af13c9.mp4",
+    },
+    {
+      title: "Tax Calculation Explained",
+      src: "https://res.cloudinary.com/degwyhp5q/video/upload/v1774868701/Screen_Recording_2026-03-26_140324_xeerxz.mp4",
+    },
+    {
+      title: "Advanced Features Tour",
+      src: "https://res.cloudinary.com/degwyhp5q/video/upload/v1774868226/buyer_h6w8wg.mp4",
+    },
+    {
+      title: "Managing Multiple Users",
+      src: "https://res.cloudinary.com/degwyhp5q/video/upload/v1774868794/Users_ip81fo.mp4",
+    },
   ]
 
-  const toPublicSrc = (filename: string) => encodeURI(`/${filename}`)
+  const resolvedVideos = videos.map((video) => ({
+    ...video,
+    posterSrc: cloudinaryPosterFromVideoUrl(video.src),
+  }))
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -61,14 +103,14 @@ export default function DemoVideosPage() {
 
             <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-4">Video Tutorials</h3>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {videos.map((video, idx) => (
+              {resolvedVideos.map((video, idx) => (
                 <Dialog key={idx}>
                   <DialogTrigger asChild>
                     <button
                       type="button"
                       className="w-full text-left border border-border/40 rounded-lg overflow-hidden hover:border-primary/20 transition-colors group"
                     >
-                      <VideoThumbnail src={toPublicSrc(video.filename)} title={video.title} />
+                      <VideoThumbnail src={video.src} posterSrc={video.posterSrc} title={video.title} />
                       <div className="p-3">
                         <h4 className="font-semibold text-foreground text-sm group-hover:text-primary transition-colors">
                           {video.title}
@@ -85,7 +127,7 @@ export default function DemoVideosPage() {
                     <div className="relative w-full aspect-video rounded-lg border border-border overflow-hidden bg-secondary/30">
                       <video
                         className="h-full w-full"
-                        src={toPublicSrc(video.filename)}
+                        src={video.src}
                         controls
                         autoPlay
                         playsInline
